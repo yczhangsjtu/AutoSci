@@ -1,11 +1,11 @@
-# Daily arXiv Recommendation and Ingest Policy
+# Daily ePrint Recommendation and Ingest Policy
 
-`/daily-arxiv` 是 LLM-first：确定性工具先构建 evidence packet，
+`/daily-eprint` 是 LLM-first：确定性工具先构建 evidence packet，
 再由 skill 判断相关性和动作。工具分数只用于排序，不是最终决策。
 
 ## Pipeline
 
-1. 解析 `config/daily-arxiv.yml`；缺失时使用推断默认值。
+1. 解析 `config/daily-eprint.yml`；缺失时使用推断默认值。
 2. 拉取最近 arXiv 论文，并按 wiki 已知 arXiv ID 去重。
 3. 从 papers、topics、concepts、methods、ideas、open questions、recent log
    和可选 profile 偏好构建 wiki profile。
@@ -46,7 +46,7 @@ LLM 为每个候选写一条 decision：
 允许的 confidence 是 `high`、`medium`、`low`。
 
 OpenAI-compatible 第三方 LLM 只支持 `inform` mode，通过
-`tools/daily_arxiv.py recommend-llm` 使用。在这条路径中，`ingest` 不是
+`tools/daily_eprint.py recommend-llm` 使用。在这条路径中，`ingest` 不是
 允许输出；如果模型尝试输出 `ingest`，会降级为 `strong_recommend`。
 
 ## Modes
@@ -60,7 +60,7 @@ OpenAI-compatible 第三方 LLM 只支持 `inform` mode，通过
 
 ## Auto-Ingest Guardrails
 
-- `/ingest` 负责所有论文纳入。`/daily-arxiv` 不得手写 paper pages、
+- `/ingest` 负责所有论文纳入。`/daily-eprint` 不得手写 paper pages、
   concepts、methods、people、graph files 或 index entries。
 - 顺序调用 `/ingest`；parallel ingest 不在 scope 内。
 - 通过 `ingest_status` 或 `ingest_error` 在 `llm-decisions.json` 和最终
@@ -71,5 +71,5 @@ OpenAI-compatible 第三方 LLM 只支持 `inform` mode，通过
 ## Relationship to `/discover`
 
 `/discover` 回答用户主动提出的 “what should I read next?”，来源可以是
-anchors、topic 或 wiki 状态，并且永不 ingest。`/daily-arxiv` 从一个新的
+anchors、topic 或 wiki 状态，并且永不 ingest。`/daily-eprint` 从一个新的
 arXiv 时间窗口出发，可通知，也可在显式配置下 ingest。

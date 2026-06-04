@@ -20,6 +20,7 @@ papers:
     title:             { type: str, required: true }
     slug:              { type: str, required: true }
     arxiv:             { type: str }
+    eprint:            { type: str }
     venue:             { type: str }
     year:              { type: int }
     tags:              { type: list_str, required: true, default: [] }

@@ -44,6 +44,7 @@ ARXIV_OLD_ID_PATTERN = re.compile(
     r"(?<![A-Za-z0-9])([a-z\-]+(?:\.[A-Z]{2})?/\d{7}(?:v\d+)?)(?!\d)",
     re.IGNORECASE,
 )
+EPRINT_ID_PATTERN = re.compile(r"eprint[._-]?(\d{4})[/_-](\d+)", re.IGNORECASE)
 MAX_SOURCE_ARCHIVE_BYTES = 250_000_000
 LATEX_UNWRAP_COMMANDS = (
     "emph",

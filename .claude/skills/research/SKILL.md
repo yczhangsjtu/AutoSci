@@ -150,7 +150,7 @@ argument-hint: <research-direction-or-brief> [--auto] [--start-from stage1|stage
 2. **Search for relevant papers** (use Agent tool with 3 parallel searches):
    - DeepXiv: `python3 tools/fetch_deepxiv.py search "{direction}" --mode hybrid --limit 20`
    - Semantic Scholar: `python3 tools/fetch_s2.py search "{direction}" --limit 20`
-   - arXiv: `python3 tools/fetch_arxiv.py` (using direction keywords)
+   - arXiv: `python3 tools/fetch_arxiv.py (arXiv) or fetch_eprint.py (ePrint)` (using direction keywords)
    - If DeepXiv is unavailable: skip; use only S2 + arXiv
 
 3. **Merge, rank, and select top 5**:
@@ -539,7 +539,7 @@ Update pipeline-progress: status: completed
 - `python3 tools/research_wiki.py init wiki/` — initialize wiki structure (Stage 0)
 - `python3 tools/fetch_deepxiv.py search "{query}" --mode hybrid --limit 20` — DeepXiv semantic search (Stage 0)
 - `python3 tools/fetch_s2.py search "{query}" --limit 20` — Semantic Scholar search (Stage 0)
-- `python3 tools/fetch_arxiv.py` — arXiv RSS search (Stage 0)
+- `python3 tools/fetch_arxiv.py (arXiv) or fetch_eprint.py (ePrint)` — arXiv RSS search (Stage 0)
 
 ### MCP Servers
 - None directly — all Review LLM interactions are used indirectly via sub-skills

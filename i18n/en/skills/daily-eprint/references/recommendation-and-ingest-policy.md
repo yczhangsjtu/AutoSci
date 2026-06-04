@@ -1,11 +1,11 @@
-# Daily arXiv Recommendation and Ingest Policy
+# Daily ePrint Recommendation and Ingest Policy
 
-`/daily-arxiv` is LLM-first: deterministic tools build an evidence packet, then
+`/daily-eprint` is LLM-first: deterministic tools build an evidence packet, then
 the skill judges relevance and action. The tool ranking is only a sorting aid.
 
 ## Pipeline
 
-1. Resolve `config/daily-arxiv.yml`; missing config means inferred defaults.
+1. Resolve `config/daily-eprint.yml`; missing config means inferred defaults.
 2. Fetch recent arXiv papers and dedupe against known wiki arXiv IDs.
 3. Build a wiki profile from papers, topics, concepts, methods, ideas, open
    questions, recent log entries, and optional profile preferences.
@@ -47,7 +47,7 @@ Allowed decisions are `strong_recommend`, `maybe`, `skip`, and `ingest`.
 Allowed confidence values are `high`, `medium`, and `low`.
 
 OpenAI-compatible third-party LLMs are supported only for `inform` mode via
-`tools/daily_arxiv.py recommend-llm`. In that path, `ingest` is not an allowed
+`tools/daily_eprint.py recommend-llm`. In that path, `ingest` is not an allowed
 output; any attempted `ingest` decision is downgraded to `strong_recommend`.
 
 ## Modes
@@ -61,7 +61,7 @@ or available credentials. The user/config/workflow input must choose it.
 
 ## Auto-Ingest Guardrails
 
-- `/ingest` owns all paper incorporation. `/daily-arxiv` must not hand-write
+- `/ingest` owns all paper incorporation. `/daily-eprint` must not hand-write
   paper pages, concepts, methods, people, graph files, or index entries.
 - Invoke `/ingest` sequentially; parallel ingest is out of scope.
 - Preserve failures in `llm-decisions.json` and the final digest via
@@ -73,5 +73,5 @@ or available credentials. The user/config/workflow input must choose it.
 ## Relationship to `/discover`
 
 `/discover` answers user-driven "what should I read next?" requests from
-anchors, topics, or wiki state and never ingests. `/daily-arxiv` starts from a
+anchors, topics, or wiki state and never ingests. `/daily-eprint` starts from a
 time-window stream of new arXiv papers and may notify or explicitly ingest.

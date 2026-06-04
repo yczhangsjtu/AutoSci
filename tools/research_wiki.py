@@ -428,11 +428,12 @@ def add_citation(wiki_root: str, from_id: str, to_id: str,
     print(json.dumps(result2))
 
 
-def _build_arxiv_index(wiki_root: Path) -> dict[str, str]:
-    """Map arXiv ID (and S2 ID) → paper slug, for citation resolution.
+def _build_id_index(wiki_root: Path) -> dict[str, str]:
+    """Map arXiv ID / ePrint ID / S2 ID → paper slug, for citation resolution.
 
-    Reads each wiki/papers/*.md frontmatter once. Both 'arxiv' and 's2_id'
-    fields are indexed so references arriving with either identifier match.
+    Reads each wiki/papers/*.md frontmatter once. The 'arxiv', 'eprint', and
+    's2_id' fields are all indexed so references arriving with any identifier
+    match.
     """
     index: dict[str, str] = {}
     papers_dir = wiki_root / "papers"
@@ -441,7 +442,7 @@ def _build_arxiv_index(wiki_root: Path) -> dict[str, str]:
     for md in papers_dir.glob("*.md"):
         slug = md.stem
         fm = _parse_frontmatter(md)
-        for key in ("arxiv", "s2_id"):
+        for key in ("arxiv", "eprint", "s2_id"):
             v = fm.get(key)
             if isinstance(v, str) and v.strip():
                 index[v.strip()] = slug
@@ -478,7 +479,7 @@ def add_citations_batch(wiki_root: str, citer_id: str) -> None:
                           "message": "stdin must be a JSON array of reference objects"}))
         sys.exit(1)
 
-    arxiv_index = _build_arxiv_index(root)
+    arxiv_index = _build_id_index(root)
 
     existing: set[tuple[str, str]] = set()
     if citations_path.exists():

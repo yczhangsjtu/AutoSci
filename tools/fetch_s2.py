@@ -4,6 +4,7 @@
 Usage:
     python3 tools/fetch_s2.py search "low rank adaptation"
     python3 tools/fetch_s2.py paper 2106.09685
+    python3 tools/fetch_s2.py eprint 2025/924 --title "Threshold Signatures"
     python3 tools/fetch_s2.py citations 2106.09685
     python3 tools/fetch_s2.py references 2106.09685
     python3 tools/fetch_s2.py recommend 2106.09685
@@ -103,6 +104,31 @@ def paper(arxiv_id: str) -> dict:
     return _get(f"/paper/ARXIV:{_bare_arxiv_id(arxiv_id)}", {"fields": FIELDS})
 
 
+def paper_by_title(title: str) -> dict | None:
+    """Get paper details by title search. Returns the top match or None.
+
+    Used as a fallback for papers that lack an arXiv ID (e.g. ePrint-only
+    papers). S2 indexes many ePrint papers via DOI — title search finds them.
+    """
+    results = search(title, limit=1)
+    return results[0] if results else None
+
+
+def eprint_paper(eprint_id: str, title: str | None = None) -> dict | None:
+    """Get paper details for an ePrint paper.
+
+    Uses title-based S2 lookup since S2 does not support direct ePrint ID
+    queries (unlike arXiv's ``ARXIV:`` prefix).
+    """
+    if title:
+        return paper_by_title(title)
+    # Without a title, try searching by the numeric part of the ePrint ID
+    # (last segment) — unlikely to match well but better than nothing
+    short = eprint_id.split("/")[-1] if "/" in eprint_id else eprint_id
+    results = search(f"cryptography {short}", limit=1)
+    return results[0] if results else None
+
+
 def citations(arxiv_id: str, limit: int = 100) -> list[dict]:
     """Get papers that cite the given paper.
 
@@ -200,6 +226,10 @@ def main():
     p_paper = sub.add_parser("paper", help="Get paper details")
     p_paper.add_argument("arxiv_id", help="arXiv ID (e.g., 2106.09685)")
 
+    p_eprint = sub.add_parser("eprint", help="Get paper details by ePrint ID (title-based S2 lookup)")
+    p_eprint.add_argument("eprint_id", help="ePrint ID (e.g., 2025/924)")
+    p_eprint.add_argument("--title", help="Paper title (improves lookup accuracy)")
+
     p_cite = sub.add_parser("citations", help="Get citations")
     p_cite.add_argument("arxiv_id", help="arXiv ID")
 
@@ -223,6 +253,8 @@ def main():
         result = search(args.query, args.n)
     elif args.command == "paper":
         result = paper(args.arxiv_id)
+    elif args.command == "eprint":
+        result = eprint_paper(args.eprint_id, getattr(args, 'title', None))
     elif args.command == "citations":
         result = citations(args.arxiv_id)
     elif args.command == "references":

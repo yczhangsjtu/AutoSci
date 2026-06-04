@@ -95,7 +95,7 @@ Use DeepXiv brief TLDRs to quickly judge method similarity.
 4. Read `wiki/graph/context_brief.md` for global perspective
 
 **Source D — Recent arXiv Preprints:**
-- Use WebSearch: `site:arxiv.org <method-keywords> 2025 2026`
+- Use WebSearch: `site:eprint.iacr.org or site:arxiv.org <method-keywords> 2025 2026`
 
 ### Step 3: Review LLM Cross-Verify
 

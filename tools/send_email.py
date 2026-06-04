@@ -33,7 +33,7 @@ def _load_config(args: argparse.Namespace) -> dict:
     username = os.environ.get("SMTP_USER", "").strip()
     password = os.environ.get("SMTP_PASSWORD", "")
     from_addr = (args.from_addr or os.environ.get("SMTP_FROM") or "").strip()
-    to_addrs = _split_recipients(args.to or os.environ.get("DAILY_ARXIV_EMAIL_TO", ""))
+    to_addrs = _split_recipients(args.to or os.environ.get("DAILY_EPRINT_EMAIL_TO", "") or os.environ.get("DAILY_ARXIV_EMAIL_TO", ""))
 
     missing: list[str] = []
     for name, value in (

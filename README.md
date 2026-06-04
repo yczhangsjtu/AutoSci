@@ -103,9 +103,9 @@ Run `/poster` after `/paper-draft` + `/paper-compile` to turn your finished draf
 
 Run `/discover --venue iclr --year 2024` (or any conference/year) and get a personalized shortlist of papers from that venue, ranked by relevance to what's already in your wiki. Instead of scrolling a 7000-paper proceedings, you see the dozen that actually matter for your research direction, each with a rationale tied to topics and methods you already track. No new API keys, no ingest side-effects on your wiki — just a ranked reading list. Supports NeurIPS, ICLR, ICML, and other venues covered by [Paper Copilot](https://github.com/papercopilot/paperlists).
 
-### 📰 2026-05-09 · Daily arXiv — fresh-paper recommendations, on demand or scheduled
+### 📰 2026-05-09 · Daily ePrint — fresh-paper recommendations, on demand or scheduled
 
-Run `/daily-arxiv` for a one-off pass, or `/daily-arxiv setup` to schedule the same pipeline in GitHub Actions. The skill builds an evidence packet from arXiv + Semantic Scholar + DeepXiv, lets the LLM rank candidates against your wiki interests, and delivers a digest by e-mail. Explicit `--mode auto-ingest` calls `/ingest` for high-confidence picks; `inform` mode just notifies.
+Run `/daily-eprint` for a one-off pass, or `/daily-eprint setup` to schedule the same pipeline in GitHub Actions. The skill builds an evidence packet from arXiv + Semantic Scholar + DeepXiv, lets the LLM rank candidates against your wiki interests, and delivers a digest by e-mail. Explicit `--mode auto-ingest` calls `/ingest` for high-confidence picks; `inform` mode just notifies.
 
 ### 🌐 2026-05-06 · Knowledge Graph Visualization — browser + Obsidian
 
@@ -309,7 +309,7 @@ and are best run from WSL2 or Linux/macOS.
 | `CLAUDE_CODE_OAUTH_TOKEN` | Optional | `claude setup-token` | GitHub Actions Claude Code auth for Pro/Max users |
 | `SEMANTIC_SCHOLAR_API_KEY` | Optional | [semanticscholar.org/product/api](https://www.semanticscholar.org/product/api) (free) | Citation graph, paper search |
 | `DEEPXIV_TOKEN` | Optional | `setup.sh` auto-registers | Semantic search, TLDR, trending |
-| `LLM_API_KEY` + `LLM_BASE_URL` + `LLM_MODEL` | Optional | Any OpenAI-compatible API | Cross-model review; `/daily-arxiv` inform recommendations |
+| `LLM_API_KEY` + `LLM_BASE_URL` + `LLM_MODEL` | Optional | Any OpenAI-compatible API | Cross-model review; `/daily-eprint` inform recommendations |
 
 > **Don't have an Anthropic API key?** AutoSci runs on Claude Code, which supports any Anthropic-protocol-compatible provider — DeepSeek, Kimi, MiMo, GLM, and more. See the [LLM API Configuration](#llm-api-configuration--大模型-api-配置) section below for setup snippets.
 
@@ -426,7 +426,7 @@ AutoSci ships with 30+ slash commands spanning the full research lifecycle.
 |---------|-------------|
 | `/prefill` | Seed `wiki/foundations/` with domain background so subsequent `/ingest` doesn't create duplicate concept pages for textbook material |
 | `/init` | Bootstrap the wiki from your source files, with optional discovery, then ingest the final paper set in parallel |
-| `/ingest` | Ingest a paper (local path or arXiv URL) — creates pages and builds all cross-references and graph edges |
+| `/ingest` | Ingest a paper (local path, arXiv or ePrint URL, or ePrint URL) — creates pages and builds all cross-references and graph edges |
 | `/discover` | Build a ranked shortlist of candidate papers (anchor-driven, topic-driven, venue-filtered, or from wiki state) without ingesting |
 | `/edit` | Add or remove raw sources, or update wiki content, per user request |
 | `/ask` | Ask the wiki a question — retrieve and synthesize relevant pages, optionally crystallize the answer back into the wiki |
@@ -435,7 +435,7 @@ AutoSci ships with 30+ slash commands spanning the full research lifecycle.
 ### Phase 2: Ideation & Experiments
 | Command | What it does |
 |---------|-------------|
-| `/daily-arxiv` | Run or schedule the daily arXiv recommendation feed; delivers a ranked digest by email with optional auto-ingest for high-confidence picks |
+| `/daily-eprint` | Run or schedule the daily ePrint recommendation feed; delivers a ranked digest by email with optional auto-ingest for high-confidence picks |
 | `/ideate` | Multi-phase research idea generation: landscape scan → dual-model brainstorm → filter & validation → write to wiki → pilot |
 | `/exp-pilot-run` | Pilot experiment execution — write code, deploy, monitor, collect raw results (called by `/ideate` Phase 5) |
 | `/exp-pilot-eval` | Pilot result evaluation — read results, apply success criteria, update idea page (called by `/ideate` Phase 5) |

@@ -34,24 +34,30 @@ import tools._env  # noqa: F401, E402  side-effect: load .env files
 PYTHON_BIN = sys.executable or "python3"
 
 
-def _parse_arxiv_id(md_path: Path) -> str | None:
-    """Return the arxiv field from frontmatter, stripped of quotes."""
+def _parse_ids(md_path: Path) -> tuple[str | None, str | None]:
+    """Return (arxiv, eprint) fields from frontmatter, stripped of quotes."""
     text = md_path.read_text(encoding="utf-8")
     if not text.startswith("---"):
-        return None
+        return None, None
     end = text.find("\n---", 4)
     if end < 0:
-        return None
+        return None, None
     fm_text = text[4:end]
+    arxiv_val: str | None = None
+    eprint_val: str | None = None
     for line in fm_text.splitlines():
-        if not line.strip().startswith("arxiv:"):
-            continue
-        v = line.split(":", 1)[1].strip()
-        # strip surrounding quotes
-        if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
-            v = v[1:-1]
-        return v or None
-    return None
+        stripped = line.strip()
+        if stripped.startswith("arxiv:"):
+            v = stripped.split(":", 1)[1].strip()
+            if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
+                v = v[1:-1]
+            arxiv_val = v or None
+        elif stripped.startswith("eprint:"):
+            v = stripped.split(":", 1)[1].strip()
+            if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
+                v = v[1:-1]
+            eprint_val = v or None
+    return arxiv_val, eprint_val
 
 
 def main() -> int:
@@ -77,23 +83,30 @@ def main() -> int:
 
     for md in paper_files:
         slug = md.stem
-        arxiv = _parse_arxiv_id(md)
-        if not arxiv:
-            print(f"  [skip] {slug}: no arxiv ID in frontmatter")
+        arxiv, eprint = _parse_ids(md)
+        if not arxiv and not eprint:
+            print(f"  [skip] {slug}: no arxiv or eprint ID in frontmatter")
             continue
 
-        print(f"  [fetch] {slug} (arxiv:{arxiv})...", end=" ", flush=True)
-        try:
-            refs_proc = subprocess.run(
-                [PYTHON_BIN, str(SCRIPT_DIR / "fetch_s2.py"), "references", arxiv],
-                cwd=REPO_ROOT,
-                capture_output=True,
-                text=True,
-                timeout=120,
-            )
-        except subprocess.TimeoutExpired:
-            print("TIMEOUT")
-            failed.append(slug)
+        id_label = f"arxiv:{arxiv}" if arxiv else f"eprint:{eprint}"
+        print(f"  [fetch] {slug} ({id_label})...", end=" ", flush=True)
+
+        if arxiv:
+            try:
+                refs_proc = subprocess.run(
+                    [PYTHON_BIN, str(SCRIPT_DIR / "fetch_s2.py"), "references", arxiv],
+                    cwd=REPO_ROOT,
+                    capture_output=True,
+                    text=True,
+                    timeout=120,
+                )
+            except subprocess.TimeoutExpired:
+                print("TIMEOUT")
+                failed.append(slug)
+                continue
+        else:
+            # ePrint: no direct S2 citation API — skip reference backfill
+            print(f"skipped (no direct S2 refs for eprint)")
             continue
 
         if refs_proc.returncode != 0:

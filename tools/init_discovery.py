@@ -1464,19 +1464,45 @@ def _download_source(candidate: dict[str, Any], raw_root: Path) -> dict[str, Any
             "ingest_format": _ingest_format_from_path(str(existing)),
         }
     arxiv_id = candidate.get("arxiv_id", "")
-    if not arxiv_id:
+    eprint_id = candidate.get("eprint_id", "")
+    if arxiv_id:
+        # Try arXiv TeX source first
+        source_result = _download_arxiv_source(arxiv_id, dest_dir)
+        if source_result["success"]:
+            return {
+                "candidate_id": candidate["candidate_id"],
+                "status": "downloaded_source",
+                "path": str(dest_dir),
+                "canonical_ingest_path": str(dest_dir),
+                "ingest_format": "directory",
+            }
+    elif eprint_id:
+        # ePrint: download PDF (ePrint does not provide TeX source tarballs)
+        dest_pdf = dest_root / f"{slug}.pdf"
+        headers = {"User-Agent": "OmegaWiki-init-discovery/1.0"}
+        try:
+            pdf_url = f"https://eprint.iacr.org/{eprint_id}.pdf"
+            pdf_resp = requests.get(pdf_url, timeout=30, headers=headers)
+            pdf_resp.raise_for_status()
+            content_type = pdf_resp.headers.get("Content-Type", "").lower()
+            if not pdf_resp.content or (
+                "application/pdf" not in content_type and not pdf_resp.content.startswith(b"%PDF")
+            ):
+                raise requests.RequestException("empty pdf")
+            _write_bytes(dest_pdf, pdf_resp.content)
+            return {
+                "candidate_id": candidate["candidate_id"],
+                "status": "downloaded_pdf",
+                "path": str(dest_pdf),
+                "canonical_ingest_path": str(dest_pdf),
+                "ingest_format": "pdf",
+            }
+        except requests.RequestException as exc:
+            if dest_pdf.exists():
+                dest_pdf.unlink()
+            return {"candidate_id": candidate["candidate_id"], "status": "failed", "error": str(exc), "path": ""}
+    else:
         return {"candidate_id": candidate["candidate_id"], "status": "skipped_no_arxiv", "path": ""}
-
-    # Try TeX source first
-    source_result = _download_arxiv_source(arxiv_id, dest_dir)
-    if source_result["success"]:
-        return {
-            "candidate_id": candidate["candidate_id"],
-            "status": "downloaded_source",
-            "path": str(dest_dir),
-            "canonical_ingest_path": str(dest_dir),
-            "ingest_format": "directory",
-        }
 
     # Fall back to PDF
     headers = {"User-Agent": "OmegaWiki-init-discovery/1.0"}
@@ -1602,15 +1628,19 @@ def fetch_from_plan(
 
 def download_to_discovered(
     raw_root: Path,
-    arxiv_id: str,
-    title: str,
+    arxiv_id: str = "",
+    eprint_id: str = "",
+    title: str = "",
     candidate_id: str | None = None,
 ) -> dict[str, Any]:
-    candidate = {
-        "candidate_id": candidate_id or f"arxiv:{arxiv_id}",
-        "arxiv_id": arxiv_id,
+    candidate: dict[str, Any] = {
+        "candidate_id": candidate_id or f"arxiv:{arxiv_id}" if arxiv_id else f"eprint:{eprint_id}",
         "title": title,
     }
+    if arxiv_id:
+        candidate["arxiv_id"] = arxiv_id
+    if eprint_id:
+        candidate["eprint_id"] = eprint_id
     return _download_source(candidate, raw_root)
 
 
@@ -1647,9 +1677,10 @@ def main() -> None:
     p_fetch.add_argument("--output-sources")
     p_fetch.add_argument("--id", action="append", default=[])
 
-    p_download = sub.add_parser("download", help="Download one arXiv paper into raw/discovered/")
+    p_download = sub.add_parser("download", help="Download one paper into raw/discovered/ (arXiv or ePrint)")
     p_download.add_argument("--raw-root", default="raw")
-    p_download.add_argument("--arxiv-id", required=True)
+    p_download.add_argument("--arxiv-id", default="")
+    p_download.add_argument("--eprint-id", default="")
     p_download.add_argument("--title", required=True)
     p_download.add_argument("--candidate-id")
 
@@ -1692,9 +1723,10 @@ def main() -> None:
     if args.command == "download":
         result = download_to_discovered(
             Path(args.raw_root),
-            args.arxiv_id,
-            args.title,
-            candidate_id=args.candidate_id,
+            arxiv_id=args.arxiv_id,
+            eprint_id=getattr(args, 'eprint_id', ''),
+            title=args.title,
+            candidate_id=getattr(args, 'candidate_id', None),
         )
         _print_json(result)
         return

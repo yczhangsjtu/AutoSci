@@ -100,7 +100,7 @@ Goal: build a comprehensive view of the target domain, including existing work, 
      python3 tools/fetch_deepxiv.py trending --days 14
      ```
      Trending papers indicate community focus areas, useful for discovering trend-driven gaps.
-   - **arXiv latest**: `site:arxiv.org <direction> 2025 2026`
+   - **arXiv latest**: `site:eprint.iacr.org or site:arxiv.org <direction> 2025 2026`
    - **If DeepXiv is unavailable**: skip DeepXiv search and trending, rely on S2 + WebSearch only (fallback to original behavior).
 
 3. **Compile landscape report** (internal use, not written to wiki):
@@ -409,8 +409,8 @@ Before writing pilot code, generate a structured Pilot Spec block per idea selec
 # Pilot Spec for: {idea-slug}
 pilot_spec:
   # --- Core context (from idea Phase 2) ---
-  hypothesis: "<1-2 sentence testable proposition>"
-  approach_sketch: "<3-5 sentence proposed method description>"
+  hypothesis: "<testable proposition>"
+  approach_sketch: "<proposed method description>"
 
   # --- What to implement ---
   implementation:

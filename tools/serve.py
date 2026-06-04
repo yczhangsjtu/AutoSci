@@ -806,8 +806,8 @@ class WikiHandler(SimpleHTTPRequestHandler):
         if path:
             return {"command": f"/ingest {path}"}
         return {
-            "command": "/ingest <local-path-or-arXiv-URL>",
-            "message": ("Replace <local-path-or-arXiv-URL> with a "
+            "command": "/ingest <local-path-or-arXiv-URL-or-ePrint-URL>",
+            "message": ("Replace <local-path-or-arXiv-URL-or-ePrint-URL> with a "
                         ".pdf path, .tex path, or arXiv link, then run in "
                         "Claude Code."),
         }

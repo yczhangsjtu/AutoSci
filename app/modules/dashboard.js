@@ -426,7 +426,7 @@ const QUICK_ACTIONS = [
 
 const QUICK_ACTION_SCHEMAS = {
   ingest: [
-    { key: "path", label: "arXiv URL / id / local .pdf or .tex path",
+    { key: "path", label: "ePrint/arXiv URL / id / local .pdf or .tex path",
       required: true, type: "text" },
   ],
   ask: [
@@ -675,7 +675,7 @@ function wireCheckpointBrowser(mount) {
       "discover",
       {},
       [
-        { key: "anchor", label: "Anchor: arXiv ID or paper slug — find similar to this paper" },
+        { key: "anchor", label: "Anchor: ePrint/arXiv ID or paper slug — find similar to this paper" },
         { key: "topic",  label: "OR Topic: a query phrase like \"diffusion HDR fusion\"" },
         { key: "venue",  label: "OR Venue slug (e.g. cvpr) — paired with year" },
         { key: "year",   label: "    Year (paired with venue)" },

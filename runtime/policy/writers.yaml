@@ -20,7 +20,7 @@
 # `frozen_after_first_write: true` is also a spec marker, not a hard lock.
 # It means: by convention, only the listed writers should set the initial
 # value, and downstream skills should leave it alone. Identity-critical
-# fields (papers.slug / arxiv / s2_id) — if you ever want a hard runtime
+# fields (papers.slug / arxiv / eprint / s2_id) — if you ever want a hard runtime
 # lock, put it in tools/research_wiki.py::set_meta as a data-integrity
 # check, not as a permission check driven by this file.
 
@@ -29,6 +29,7 @@ fields:
   # Paper identity & ranking — set at ingest, frozen after.
   papers.importance:        { writers: [ingest], frozen_after_first_write: true }
   papers.arxiv:             { writers: [ingest], frozen_after_first_write: true }
+  papers.eprint:            { writers: [ingest], frozen_after_first_write: true }
   papers.s2_id:             { writers: [ingest], frozen_after_first_write: true }
   papers.slug:              { writers: [ingest], frozen_after_first_write: true }
   papers.cited_by:          { writers: [ingest] }

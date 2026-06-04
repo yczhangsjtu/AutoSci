@@ -149,6 +149,11 @@ def extract_frontmatter_value(content: str, field: str) -> str | None:
         return None
     # Strip quotes
     val = val.strip().strip('"').strip("'")
+    # Leave list-format values intact: _extract_list_field_slugs handles
+    # the `["slug1", "slug2"]` format, and bracket-stripping here would
+    # produce a malformed string that fails path resolution.
+    if val.startswith("[") and '"' in val:
+        return val
     # Strip wiki-link brackets — `link`-type fields are sometimes written as
     # `parent_topic: [[slug]]` per the wikilink convention. Match the
     # projection's _clean_link_slug behavior so lint and projection agree.

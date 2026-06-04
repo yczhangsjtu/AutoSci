@@ -1,17 +1,17 @@
-# Daily arXiv Automation
+# Daily ePrint Automation
 
-GitHub Actions 是 `/daily-arxiv` 的无人值守调度器。它应运行与手动 slash
+GitHub Actions 是 `/daily-eprint` 的无人值守调度器。它应运行与手动 slash
 skill 相同的 pipeline；它不定义这个功能的用户入口。
 
 ## Source of Truth
 
-- `config/daily-arxiv.yml`：持久、非 secret 的用户偏好。
-- `tools/daily_arxiv.py`：确定性的 config、feed、evidence、digest helper。
-- `/daily-arxiv`：LLM 判断、setup/status UX，以及可选 `/ingest` 编排。
-- `.github/workflows/daily-arxiv.yml`：定时执行器。
+- `config/daily-eprint.yml`：持久、非 secret 的用户偏好。
+- `tools/daily_eprint.py`：确定性的 config、feed、evidence、digest helper。
+- `/daily-eprint`：LLM 判断、setup/status UX，以及可选 `/ingest` 编排。
+- `.github/workflows/daily-eprint.yml`：定时执行器。
 
-如果缺少 `config/daily-arxiv.yml`，手动运行继续使用推断默认值。
-`/daily-arxiv setup` 可复制 `config/daily-arxiv.yml.example`。
+如果缺少 `config/daily-eprint.yml`，手动运行继续使用推断默认值。
+`/daily-eprint setup` 可复制 `config/daily-eprint.yml.example`。
 
 ## Workflow Behavior
 
@@ -47,7 +47,7 @@ SMTP 发送：
 - `SMTP_FROM`
 - `DAILY_ARXIV_EMAIL_TO`
 
-不要把 secrets 写进 `config/daily-arxiv.yml`。
+不要把 secrets 写进 `config/daily-eprint.yml`。
 
 ## Artifacts
 
@@ -64,13 +64,13 @@ Markdown digest 也会写入 GitHub Actions job summary。
 
 ## Status Checks
 
-`/daily-arxiv status` 应检查：
+`/daily-eprint status` 应检查：
 
 - config 是否存在，以及解析后的 mode/caps/categories
 - workflow 文件是否存在和 schedule
 - `schedule.enabled` 是否为 false
 - 本地 env vars 或可见 CI secrets 是否可用
-- 本地 `.daily-arxiv/` 中最近 digest（若存在）
+- 本地 `.daily-eprint/` 中最近 digest（若存在）
 
 ## Failure Behavior
 

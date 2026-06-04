@@ -384,7 +384,7 @@ function renderIntentButtons(type, slug, fm) {
                           title="Generate research ideas under this topic">/ideate</button>`);
   }
   if (type === "papers") {
-    const anchor = (fm && fm.arxiv) ? fm.arxiv : slug;
+    const anchor = (fm && fm.eprint) ? fm.eprint : ((fm && fm.arxiv) ? fm.arxiv : slug);
     buttons.push(`<button type="button" class="ghost-mini intent-btn"
                           data-skill="discover"
                           data-context='{"anchor":"${esc(anchor)}"}'
@@ -762,6 +762,9 @@ function renderMetadata(type, fm) {
   }
   if (fm.affiliation) {
     chips.push(`<span class="chip">${esc(fm.affiliation)}</span>`);
+  }
+  if (fm.eprint) {
+    chips.push(`<a class="chip ext" target="_blank" rel="noopener" href="https://eprint.iacr.org/${esc(fm.eprint)}">ePrint:${esc(fm.eprint)}</a>`);
   }
   if (fm.arxiv) {
     chips.push(`<a class="chip ext" target="_blank" rel="noopener" href="https://arxiv.org/abs/${esc(fm.arxiv)}">arXiv:${esc(fm.arxiv)}</a>`);

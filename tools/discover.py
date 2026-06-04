@@ -97,9 +97,11 @@ def _normalize_candidate(raw: dict[str, Any], *, source: str, anchor: str = "") 
 
 
 def _candidate_key(c: dict[str, Any]) -> str:
-    """Stable dedup key — prefer arxiv_id, fall back to paperId, then title."""
+    """Stable dedup key — prefer arxiv_id, fall back to eprint_id, paperId, then title."""
     if c.get("arxiv_id"):
         return f"arxiv:{c['arxiv_id']}"
+    if c.get("eprint_id"):
+        return f"eprint:{c['eprint_id']}"
     if c.get("paperId"):
         return f"s2:{c['paperId']}"
     title = re.sub(r"\s+", " ", (c.get("title") or "").strip().lower())
@@ -427,6 +429,7 @@ def _normalize_papercopilot_record(raw: dict[str, Any], *, venue: str, year: int
 
 _FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
 _ARXIV_LINE_RE = re.compile(r"^arxiv(?:_id)?\s*:\s*[\"']?([^\"'\n]+)[\"']?\s*$", re.MULTILINE)
+_EPRINT_LINE_RE = re.compile(r"^eprint\s*:\s*[\"']?([^\"'\n]+)[\"']?\s*$", re.MULTILINE)
 _TITLE_LINE_RE = re.compile(r"^title\s*:\s*[\"']?([^\"'\n]+)[\"']?\s*$", re.MULTILINE)
 
 
@@ -443,21 +446,47 @@ def _extract_arxiv_id_from_paper(path: Path) -> str:
     return (am.group(1).strip() if am else "")
 
 
-def _wiki_known_arxiv_ids(wiki_root: Path | None) -> set[str]:
-    """Scan wiki/papers/*.md for arxiv/arxiv_id frontmatter values."""
+def _extract_ids_from_paper(path: Path) -> tuple[str, str]:
+    """Return (arxiv_id, eprint_id) from a paper page's frontmatter."""
+    try:
+        text = path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return "", ""
+    m = _FRONTMATTER_RE.match(text)
+    if not m:
+        return "", ""
+    fm = m.group(1)
+    am = _ARXIV_LINE_RE.search(fm)
+    em = _EPRINT_LINE_RE.search(fm)
+    return (am.group(1).strip() if am else ""), (em.group(1).strip() if em else "")
+
+
+def _wiki_known_ids(wiki_root: Path | None) -> tuple[set[str], set[str]]:
+    """Scan wiki/papers/*.md for arxiv AND eprint frontmatter values.
+
+    Returns (arxiv_ids, eprint_ids) — both stripped of prefixes/versions.
+    """
     if not wiki_root or not wiki_root.exists():
-        return set()
+        return set(), set()
     papers_dir = wiki_root / "papers"
     if not papers_dir.exists():
-        return set()
-    seen: set[str] = set()
+        return set(), set()
+    arxiv_seen: set[str] = set()
+    eprint_seen: set[str] = set()
     for path in papers_dir.glob("*.md"):
-        aid = _extract_arxiv_id_from_paper(path)
+        aid, eid = _extract_ids_from_paper(path)
         if aid:
-            # Strip arXiv prefixes for match consistency.
             bare = aid.removeprefix("arXiv:").removeprefix("ARXIV:").removeprefix("arxiv:").strip()
-            seen.add(re.sub(r"v[0-9]+$", "", bare, flags=re.IGNORECASE))
-    return seen
+            arxiv_seen.add(re.sub(r"v[0-9]+$", "", bare, flags=re.IGNORECASE))
+        if eid:
+            eprint_seen.add(eid.strip())
+    return arxiv_seen, eprint_seen
+
+
+def _wiki_known_arxiv_ids(wiki_root: Path | None) -> set[str]:
+    """Scan wiki/papers/*.md for arxiv frontmatter values (legacy; prefer _wiki_known_ids)."""
+    arxiv_ids, _ = _wiki_known_ids(wiki_root)
+    return arxiv_ids
 
 
 def _title_key(title: str) -> str:
